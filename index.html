@@ -16,11 +16,18 @@
       margin: 50px auto;
       border-radius: 10px;
       cursor: pointer;
-      touch-action: manipulation; /* 모바일 터치 지연 줄임 */
+      touch-action: manipulation;
     }
     #result {
       font-size: 1.5em;
       margin-top: 20px;
+    }
+    #closeBtn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1em;
+      display: none;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -28,13 +35,21 @@
   <h1>반응 속도 테스트</h1>
   <div id="gameBox"></div>
   <div id="result">초록색으로 바뀌면 클릭하세요!</div>
+  <button id="closeBtn">닫기</button>
   <script>
     const gameBox = document.getElementById('gameBox');
     const result = document.getElementById('result');
+    const closeBtn = document.getElementById('closeBtn');
+
     let isReady = false;
     let startTime, timeoutId;
+    let reactionTimes = [];
+    let trialCount = 0;
+    const maxTrials = 5;
 
     function startGame() {
+      if (trialCount >= maxTrials) return;  // 5번 끝나면 멈춤
+
       result.textContent = "잠시 기다리세요...";
       gameBox.style.backgroundColor = 'black';
       isReady = false;
@@ -49,30 +64,52 @@
     }
 
     function handleClick(e) {
-      e.preventDefault();  // 중복 실행 방지
+      e.preventDefault();
 
       if (!isReady) {
         clearTimeout(timeoutId);
         result.textContent = "너무 빨랐어요! 실격!";
       } else {
         const reactionTime = Date.now() - startTime;
-        let grade = '';
+        reactionTimes.push(reactionTime);
+        trialCount++;
 
-        if (reactionTime <= 100) grade = 'S 등급 (초고속!)';
-        else if (reactionTime <= 150) grade = 'A 등급 (훌륭함)';
-        else if (reactionTime <= 250) grade = 'B 등급 (좋음)';
-        else if (reactionTime <= 350) grade = 'C 등급 (보통)';
-        else grade = 'D 등급 (느림)';
+        result.textContent = `#${trialCount} 반응 속도: ${reactionTime}ms`;
 
-        result.textContent = `반응 속도: ${reactionTime}ms (${grade})`;
+        if (trialCount >= maxTrials) {
+          showFinalResult();
+        } else {
+          setTimeout(startGame, 1500);  // 다음 테스트 시작
+        }
       }
-
-      setTimeout(startGame, 2000);
     }
 
-    // touchstart와 click 둘 다 처리
+    function showFinalResult() {
+      const sum = reactionTimes.reduce((a, b) => a + b, 0);
+      const avg = Math.round(sum / reactionTimes.length);
+      const min = Math.min(...reactionTimes);
+      const max = Math.max(...reactionTimes);
+
+      result.innerHTML = `
+        테스트 완료!<br>
+        평균 반응속도: ${avg}ms<br>
+        최소 반응속도: ${min}ms<br>
+        최대 반응속도: ${max}ms
+      `;
+
+      closeBtn.style.display = 'inline-block';
+    }
+
+    function resetGame() {
+      reactionTimes = [];
+      trialCount = 0;
+      closeBtn.style.display = 'none';
+      startGame();
+    }
+
     gameBox.addEventListener('touchstart', handleClick);
     gameBox.addEventListener('click', handleClick);
+    closeBtn.addEventListener('click', resetGame);
 
     startGame();
   </script>
