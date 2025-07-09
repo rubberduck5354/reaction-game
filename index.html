@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>반응 속도 테스트 게임</title>
   <style>
     body {
@@ -16,6 +16,7 @@
       margin: 50px auto;
       border-radius: 10px;
       cursor: pointer;
+      touch-action: manipulation; /* 모바일 터치 지연 줄임 */
     }
     #result {
       font-size: 1.5em;
@@ -47,7 +48,9 @@
       }, randomDelay);
     }
 
-    gameBox.addEventListener('click', () => {
+    function handleClick(e) {
+      e.preventDefault();  // 중복 실행 방지
+
       if (!isReady) {
         clearTimeout(timeoutId);
         result.textContent = "너무 빨랐어요! 실격!";
@@ -65,7 +68,11 @@
       }
 
       setTimeout(startGame, 2000);
-    });
+    }
+
+    // touchstart와 click 둘 다 처리
+    gameBox.addEventListener('touchstart', handleClick);
+    gameBox.addEventListener('click', handleClick);
 
     startGame();
   </script>
