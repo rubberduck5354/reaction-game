@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>반응 속도 테스트 게임</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+    }
+    #gameBox {
+      width: 300px;
+      height: 300px;
+      background-color: black;
+      margin: 50px auto;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    #result {
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>반응 속도 테스트</h1>
+  <div id="gameBox"></div>
+  <div id="result">초록색으로 바뀌면 클릭하세요!</div>
+  <script>
+    const gameBox = document.getElementById('gameBox');
+    const result = document.getElementById('result');
+    let isReady = false;
+    let startTime, timeoutId;
+
+    function startGame() {
+      result.textContent = "잠시 기다리세요...";
+      gameBox.style.backgroundColor = 'black';
+      isReady = false;
+
+      const randomDelay = Math.floor(Math.random() * 2000) + 2000;
+      timeoutId = setTimeout(() => {
+        gameBox.style.backgroundColor = 'green';
+        startTime = Date.now();
+        isReady = true;
+        result.textContent = "지금 클릭!";
+      }, randomDelay);
+    }
+
+    gameBox.addEventListener('click', () => {
+      if (!isReady) {
+        clearTimeout(timeoutId);
+        result.textContent = "너무 빨랐어요! 실격!";
+      } else {
+        const reactionTime = Date.now() - startTime;
+        let grade = '';
+
+        if (reactionTime <= 100) grade = 'S 등급 (초고속!)';
+        else if (reactionTime <= 150) grade = 'A 등급 (훌륭함)';
+        else if (reactionTime <= 250) grade = 'B 등급 (좋음)';
+        else if (reactionTime <= 350) grade = 'C 등급 (보통)';
+        else grade = 'D 등급 (느림)';
+
+        result.textContent = `반응 속도: ${reactionTime}ms (${grade})`;
+      }
+
+      setTimeout(startGame, 2000);
+    });
+
+    startGame();
+  </script>
+</body>
+</html>
